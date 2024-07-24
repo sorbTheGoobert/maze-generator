@@ -1,7 +1,7 @@
 const maze = document.getElementById("maze");
 const ctx = maze.getContext("2d");
-let mapLength = 128;
-let mapHeight = 32;
+let mapLength = 16;
+let mapHeight = 16;
 let mapSize = mapLength * mapHeight;
 let map = new Array(mapSize);
 let wallWidth = 10;
@@ -17,15 +17,34 @@ let currentCellY = 0;
 let x = 0;
 let y = 0;
 let rng;
-let time = 0;
-maze.style.width = "0";
-maze.style.height = "0";
+// maze.style.width = "0";
+// maze.style.height = "0";
 document.body.style.height = "100vh";
+document.body.style.width = "100vw";
+
+//init();
 
 function init() {
+    // mapLength = document.getElementById("Xsize").value;
+    // mapHeight = document.getElementById("Ysize").value;
+    mapSize = mapLength * mapHeight;
+    // for(i = 0; i < mapSize; i++){
+    //     map.pop();
+    // }
+    map = new Array(mapSize);
+    wallWidth = 10;
+    cellSize = 100;
+    index = 0;
+    indexBefore = 0;
+    startingPoint = 0;
+    stack = [];
+    currentCellX = 0;
+    currentCellY = 0;
+    x = 0;
+    y = 0;
     maze.style.aspectRatio = `${mapLength / mapHeight}`;
     maze.style.width = "fit-content";
-    maze.style.height = "95vh";
+    maze.style.height = `${window.innerHeight * 0.95}px`;
     maze.style.padding = "10px 15px"
     document.getElementById("adjustments").padding = "35px 0 15px";
     document.getElementById("adjustments").style.height = "fit-content";
@@ -36,6 +55,7 @@ function init() {
     map[0] = 1;
     maze.width = mapLength * cellSize + (mapLength + 1) * wallWidth;
     maze.height = mapHeight * cellSize + (mapHeight + 1) * wallWidth;
+    ctx.clearRect(0, 0, maze.width, maze.height);
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, maze.width, maze.height);
     ctx.translate(wallWidth, wallWidth);
@@ -70,7 +90,7 @@ function calculatePossibleMoves(index) {
     return possibleMoves;
 }
 
-function generateMaze() {
+async function generateMaze() {
     for (i = 0; i < mapSize; i++) {
         currentPossibleMoves = calculatePossibleMoves(index);
         currentPossibleMovesAmount = currentPossibleMoves[0] + currentPossibleMoves[1] + currentPossibleMoves[2] + currentPossibleMoves[3];
@@ -146,8 +166,9 @@ function generateMaze() {
             }
             map[index] = 1;
         }
+        console.log(index);
         findWalls(index, indexBefore);
-        console.log(i);
+        await wait(10);
     }
 }
 
@@ -169,12 +190,7 @@ function findWalls(a, b) {
     if (a - b == -mapLength) {
         ctx.fillRect(x * cellSize + x * wallWidth, (y + 1) * cellSize + y * wallWidth, cellSize, wallWidth);
     }
-    time++;
 }
-// function wait(ms) {
-//     setTimeout(nothing, ms);
-// }
-
-// function nothing(){
-
-// }
+function wait(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}

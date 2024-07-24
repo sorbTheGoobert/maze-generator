@@ -18,7 +18,7 @@
             /* gap: 50px; */
             /* overflow: hidden; */
         }
-        #adjustments {
+        /* #adjustments {
             width: 100vw;
             display: flex;
             justify-content: center;
@@ -31,13 +31,15 @@
             height: fit-content;
             padding: 10px 15px;
             font-size: 32px;
-        }
+        } */
     </style>
 </head>
 <body>
     <canvas id="maze"></canvas>
     <div id="adjustments">
         <button onclick="init()" id="generate">Generate</button>
+        <input type="number" id="Xsize" placeholder="8">
+        <input type="number" id="Ysize" placeholder="8">
     </div>
     <script src="./script.js"></script>
 </body>
