@@ -4,8 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>maze</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: fit-content;
+            box-sizing: border-box;
+            margin: 0;
+            height: fit-content;
+            flex-wrap: wrap;
+            flex-direction: column;
+            /* gap: 50px; */
+            /* overflow: hidden; */
+        }
+        #adjustments {
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            padding: 15px 0 15px;
+            height: calc(100vh - 65px);
+            align-items: center;
+        }
+        #generate {
+            width: fit-content;
+            height: fit-content;
+            padding: 10px 15px;
+            font-size: 32px;
+        }
+    </style>
 </head>
 <body>
+    <canvas id="maze"></canvas>
+    <div id="adjustments">
+        <button onclick="init()" id="generate">Generate</button>
+    </div>
     <script src="./script.js"></script>
 </body>
 </html>

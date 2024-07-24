@@ -1,107 +1,180 @@
-let map = [
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-]
-let mapSize = 16;
-let mapLength = 4;
-let mapHeigth = 4;
+const maze = document.getElementById("maze");
+const ctx = maze.getContext("2d");
+let mapLength = 128;
+let mapHeight = 32;
+let mapSize = mapLength * mapHeight;
+let map = new Array(mapSize);
+let wallWidth = 10;
+let cellSize = 100;
 let index = 0;
+let indexBefore = 0;
 let startingPoint = 0;
-let stack = new Array(16);
-let visited = new Array(16);
+let stack = [];
 let currentPossibleMoves;
+let currentPossibleMovesAmount;
+let currentCellX = 0;
+let currentCellY = 0;
+let x = 0;
+let y = 0;
+let rng;
+let time = 0;
+maze.style.width = "0";
+maze.style.height = "0";
+document.body.style.height = "100vh";
+
+function init() {
+    maze.style.aspectRatio = `${mapLength / mapHeight}`;
+    maze.style.width = "fit-content";
+    maze.style.height = "95vh";
+    maze.style.padding = "10px 15px"
+    document.getElementById("adjustments").padding = "35px 0 15px";
+    document.getElementById("adjustments").style.height = "fit-content";
+    document.body.style.height = "fit-content";
+    for(i = 0; i < mapSize; i++){
+        map[i] = 0;
+    }
+    map[0] = 1;
+    maze.width = mapLength * cellSize + (mapLength + 1) * wallWidth;
+    maze.height = mapHeight * cellSize + (mapHeight + 1) * wallWidth;
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, maze.width, maze.height);
+    ctx.translate(wallWidth, wallWidth);
+    for (i = 0; i < mapHeight; i++) {
+        for (j = 0; j < mapLength; j++) {
+            currentCellX = j * (cellSize + wallWidth);
+            currentCellY = i * (cellSize + wallWidth);
+            ctx.fillStyle = "white";
+            ctx.fillRect(currentCellX, currentCellY, cellSize, cellSize);
+        }
+    }
+    generateMaze();
+    ctx.translate(0, 0);
+    ctx.fillStyle = "white";
+    ctx.fillRect(-wallWidth, 0, wallWidth, cellSize);
+    ctx.fillRect(maze.width - wallWidth * 2, maze.height - wallWidth * 2 - cellSize, wallWidth, cellSize);
+}
 function calculatePossibleMoves(index) {
-    var possibleMoves = [0, 0, 0, 0];
+    let possibleMoves = [0, 0, 0, 0];
     if (map[index + 1] == 0 && (index + 1) % mapLength != 0) {
         possibleMoves[0]++;
-        //right
-        //works
     }
     if (map[index - 1] == 0 && index % mapLength != 0) {
         possibleMoves[1]++;
-        //left
-        //works
     }
     if (map[index + mapLength] == 0 && index + mapLength < mapSize) {
         possibleMoves[2]++;
-        //down
-        //works
     }
     if (map[index - mapLength] == 0 && index >= mapLength) {
         possibleMoves[3]++;
-        //top
-        //works
     }
     return possibleMoves;
 }
-let rng;
-for (i = 0; i < mapSize; i++) {
-    currentPossibleMoves = calculatePossibleMoves(index);
-    if (currentPossibleMoves != 0) {
-        rng = Math.floor(Math.random() * (currentPossibleMoves[0] + currentPossibleMoves[1] + currentPossibleMoves[2] + currentPossibleMoves[3])) + 1;
-        console.log(`${rng} is rng`);
-        console.log(`${currentPossibleMoves[0] + currentPossibleMoves[1] + currentPossibleMoves[2] + currentPossibleMoves[3]} is all moves`);
-        console.log(`${currentPossibleMoves} is all moves`);
-        if (currentPossibleMoves[0] != 0) {
-            if (rng - 1 == 0) {
-                visited.push(index);
+
+function generateMaze() {
+    for (i = 0; i < mapSize; i++) {
+        currentPossibleMoves = calculatePossibleMoves(index);
+        currentPossibleMovesAmount = currentPossibleMoves[0] + currentPossibleMoves[1] + currentPossibleMoves[2] + currentPossibleMoves[3];
+        indexBefore = index;
+        if (currentPossibleMovesAmount > 0) {
+            rng = Math.floor(Math.random() * (currentPossibleMovesAmount)) + 1;
+            if (currentPossibleMoves[0] != 0) {
+                if (rng - 1 == 0) {
+                    stack.push(index);
+                    index++;
+                    rng = 0;
+                } else {
+                    rng--;
+                }
+            }
+            if (currentPossibleMoves[1] != 0) {
+                if (rng - 1 == 0) {
+                    stack.push(index);
+                    index--;
+                    rng = 0;
+                } else {
+                    rng--;
+                }
+            }
+            if (currentPossibleMoves[2] != 0) {
+                if (rng - 1 == 0) {
+                    stack.push(index);
+                    index += mapLength;
+                    rng = 0;
+                } else {
+                    rng--;
+                }
+            }
+            if (currentPossibleMoves[3] != 0) {
+                if (rng - 1 == 0) {
+                    stack.push(index);
+                    index -= mapLength;
+                    rng = 0;
+                } else {
+                    rng--;
+                }
+            }
+            map[index] = 1;
+            // findWalls(index, indexBefore);
+        } else {
+            for (l = 0; l < mapSize; l++) {
+                index = stack.pop();
+                currentPossibleMoves = calculatePossibleMoves(index);
+                currentPossibleMovesAmount = currentPossibleMoves[0] + currentPossibleMoves[1] + currentPossibleMoves[2] + currentPossibleMoves[3];
+                if (currentPossibleMovesAmount) {
+                    l = mapSize;
+                }
+            }
+            if (currentPossibleMoves[0] != 0) {
                 stack.push(index);
-                map[index] = 1;
+                indexBefore = index;
                 index++;
-                console.log("right");
-                rng = 0;
-            }else{
-                rng--;
             }
-        }
-        if (currentPossibleMoves[1] != 0) {
-            if (rng - 1 == 0) {
-                visited.push(index);
+            if (currentPossibleMoves[1] != 0) {
                 stack.push(index);
-                map[index] = 1;
+                indexBefore = index;
                 index--;
-                console.log("left");
-                rng = 0;
-            }else{
-                rng--;
             }
-        }
-        if (currentPossibleMoves[2] != 0) {
-            if (rng - 1 == 0) {
-                visited.push(index);
+            if (currentPossibleMoves[2] != 0) {
                 stack.push(index);
-                map[index] = 1;
+                indexBefore = index;
                 index += mapLength;
-                console.log("down");
-                rng = 0;
-            }else{
-                rng--;
             }
-        }
-        if (currentPossibleMoves[3] != 0) {
-            if (rng - 1 == 0) {
-                visited.push(index);
+            if (currentPossibleMoves[3] != 0) {
                 stack.push(index);
-                map[index] = 1;
+                indexBefore = index;
                 index -= mapLength;
-                console.log("up");
-                rng = 0;
-            }else{
-                rng--;
             }
+            map[index] = 1;
         }
-        console.log(index);
-        console.log(map);
-    } else {
-        console.log("stuck");
-        console.log(stack);
-        console.log("---------------");
-        console.log(visited);
-        break;
+        findWalls(index, indexBefore);
+        console.log(i);
     }
 }
-function init() {
 
+
+function findWalls(a, b) {
+    let x, y;
+    x = Math.floor(index % mapLength);
+    y = Math.floor(index / mapLength);
+    ctx.fillStyle = "white";
+    if (a - b == 1) {
+        ctx.fillRect(x * cellSize + (x - 1) * wallWidth, y * cellSize + y * wallWidth, wallWidth, cellSize);
+    }
+    if (a - b == -1) {
+        ctx.fillRect((x + 1) * cellSize + x * wallWidth, y * cellSize + y * wallWidth, wallWidth, cellSize);
+    }
+    if (a - b == mapLength) {
+        ctx.fillRect(x * cellSize + x * wallWidth, y * cellSize + (y - 1) * wallWidth, cellSize, wallWidth);
+    }
+    if (a - b == -mapLength) {
+        ctx.fillRect(x * cellSize + x * wallWidth, (y + 1) * cellSize + y * wallWidth, cellSize, wallWidth);
+    }
+    time++;
 }
+// function wait(ms) {
+//     setTimeout(nothing, ms);
+// }
+
+// function nothing(){
+
+// }
