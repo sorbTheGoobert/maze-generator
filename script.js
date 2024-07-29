@@ -1,7 +1,7 @@
 const maze = document.getElementById("maze");
 const ctx = maze.getContext("2d");
-let mapLength = 16;
-let mapHeight = 16;
+let mapLength = 4;
+let mapHeight = 4;
 let mapSize = mapLength * mapHeight;
 let map = new Array(mapSize);
 let wallWidth = 10;
@@ -17,7 +17,7 @@ let currentCellY = 0;
 let x = 0;
 let y = 0;
 let rng;
-let solution = [];
+let solution = []
 // maze.style.width = "0";
 // maze.style.height = "0";
 document.body.style.height = "100vh";
@@ -25,15 +25,16 @@ document.body.style.width = "100vw";
 
 //init();
 
-function init() {
+async function init() {
     mapLength = parseInt(document.getElementById("Xsize").value);
     mapHeight = parseInt(document.getElementById("Ysize").value);
-    // console.log(document.getElementById("Xsize").value);
-    // console.log(document.getElementById("Ysize").value);
+    if (isNaN(mapLength)) {
+        mapLength = 4;
+    }
+    if (isNaN(mapHeight)) {
+        mapHeight = 4;
+    }
     mapSize = mapLength * mapHeight;
-    // for(i = 0; i < mapSize; i++){
-    //     map.pop();
-    // }
     map = new Array(mapSize);
     wallWidth = 10;
     cellSize = 100;
@@ -41,7 +42,6 @@ function init() {
     indexBefore = 0;
     startingPoint = 0;
     stack = [];
-    // console.log(stack.length);
     currentCellX = 0;
     currentCellY = 0;
     x = 0;
@@ -53,6 +53,7 @@ function init() {
     document.getElementById("adjustments").padding = "35px 0 15px";
     document.getElementById("adjustments").style.height = "fit-content";
     document.body.style.height = "fit-content";
+    solution = [];
     for (i = 0; i < mapSize; i++) {
         map[i] = 0;
     }
@@ -71,16 +72,15 @@ function init() {
             ctx.fillRect(currentCellX, currentCellY, cellSize, cellSize);
         }
     }
-    generateMaze();
-    for(i = 1; i <= solution.length; i++){
-        drawSolution(solution[i], solution[i-1]);
-        console.log("hello???");
+    await generateMaze();
+    for (i = 1; i < solution.length; i++) {
+        drawSolution(solution[i - 1], solution[i]);
     }
     ctx.translate(0, 0);
     ctx.fillStyle = "white";
     ctx.fillRect(-wallWidth, 0, wallWidth, cellSize);
     ctx.fillRect(maze.width - wallWidth * 2, maze.height - wallWidth * 2 - cellSize, wallWidth, cellSize);
-    
+
 }
 function calculatePossibleMoves(index) {
     let possibleMoves = [0, 0, 0, 0];
@@ -143,8 +143,13 @@ async function generateMaze() {
                 }
             }
             map[index] = 1;
-            // findWalls(index, indexBefore);
         } else {
+            if(index == map.length - 1){
+                stack.push(index); 
+                stack.forEach((s) => {
+                    solution.push(s);
+                })
+            }
             for (l = 0; l < mapSize; l++) {
                 index = stack.pop();
                 currentPossibleMoves = calculatePossibleMoves(index);
@@ -175,24 +180,18 @@ async function generateMaze() {
             }
             map[index] = 1;
         }
-        console.log(stack);
-        if(stack[stack.length - 1] == 15){
-            // solution = new Array(stack.length);
-            solution = stack;
-            console.log("solution");
-            console.log(solution);
-            console.log("solution");
+        if (stack[stack.length - 1] == map.length - 1) {
+            stack.forEach((s) => {
+                solution.push(s);
+            })
         }
+
         findWalls(index, indexBefore);
-        // await wait(10);
+        await wait(10);
     }
-    console.log("solution");
-    console.log(solution);
-    console.log("solution");
-    console.log("stack");
-    console.log(stack);
-    console.log("stack");
 }
+
+
 
 
 function findWalls(a, b) {
@@ -221,18 +220,17 @@ function download() {
     link.click();
 }
 
-function drawSolution(a, b){
+function drawSolution(a, b) {
     x = Math.floor(a % mapLength);
     y = Math.floor(a / mapLength);
     ctx.beginPath();
-    ctx.lineWidth =  10;
+    ctx.lineWidth = 10;
     ctx.strokeStyle = "red";
     ctx.moveTo((x + 0.5) * (cellSize + wallWidth) - 2.5, (y + 0.5) * (cellSize + wallWidth) - 5);
     x = Math.floor(b % mapLength);
     y = Math.floor(b / mapLength);
     ctx.lineTo((x + 0.5) * (cellSize + wallWidth) - 2.5, (y + 0.5) * (cellSize + wallWidth) - 5);
     ctx.stroke();
-    console.log(`drew ${a} to ${b}`);
 }
 
 function wait(ms) {
